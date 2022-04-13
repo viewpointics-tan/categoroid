@@ -1,13 +1,15 @@
-#[derive(Debug)]
-enum Arrow {
+use std::collections::HashSet;
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+enum Arrow<'a> {
     PureArrow {
-        name: String,
-        dom: String,
-        cod: String,
+        name: &'a str,
+        dom: &'a str,
+        cod: &'a str,
     },
     Id {
-        dom: String,
-        cod: String,
+        dom: &'a str,
+        cod: &'a str,
     },
 }
 // struct Category {
@@ -16,19 +18,13 @@ enum Arrow {
 // }
 
 #[derive(Debug)]
-struct Context(Vec<Arrow>);
-impl Context {
-    fn new() -> Context {
-        let new_vec: Vec<Arrow> = vec![];
-        return Context(new_vec);
+struct Context<'a>(Vec<Arrow<'a>>);
+impl<'a> Context<'a> {
+    fn init(arrow: Arrow<'a>) -> Context<'a> {
+        return Context(Vec::from([arrow]));
     }
 
-    fn init(&mut self, arrow: Arrow) -> &mut Context {
-        self.0 = vec![arrow];
-        return self;
-    }
-
-    fn compose(&mut self, arrow: Arrow) -> &mut Context {
+    fn compose(mut self, arrow: Arrow<'a>) -> Context<'a> {
         self.0.push(arrow);
         return self;
     }
@@ -37,20 +33,22 @@ impl Context {
 }
 
 fn main() {
-    let arrows: Vec<Arrow> = vec![];
+    let arrows: HashSet<Arrow> = HashSet::from([Arrow::PureArrow {
+        name: "f",
+        dom: "A",
+        cod: "B",
+    }]);
 
-    let mut context: Context = Context::new();
-    context
-        .init(Arrow::PureArrow {
-            name: "f".to_string(),
-            dom: "A".to_string(),
-            cod: "B".to_string(),
-        })
-        .compose(Arrow::PureArrow {
-            name: "g".to_string(),
-            dom: "B".to_string(),
-            cod: "C".to_string(),
-        });
+    let context: Context = Context::init(Arrow::PureArrow {
+        name: "f",
+        dom: "A",
+        cod: "B",
+    })
+    .compose(Arrow::PureArrow {
+        name: "g",
+        dom: "B",
+        cod: "C",
+    });
 
     println!("{:?}", context);
 }
